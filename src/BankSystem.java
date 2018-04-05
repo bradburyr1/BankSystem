@@ -1,11 +1,10 @@
 import java.util.Scanner;
-
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.jsoup.Jsoup;
-
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URL;
 import java.text.DecimalFormat;
@@ -28,6 +27,9 @@ public class BankSystem {
 		}
 		else if(comm.equals("balance")){
 			inter.balance();
+		}
+		else if(comm.equals("withdraw")){
+			inter.withdraw(scan);
 		}
 		else if(comm.equals("exit")){
 			exit = true;
@@ -67,14 +69,14 @@ class Interact{
 	
 	public void deposit(Scanner scan) throws IOException{
 		
-		double value = 0.0;//What the user enters
+		String value = "";//What the user enters
 		
 		boolean good = false;//Check whether the input is good 
 		do{
 			//Show prompt and get string input
 			System.out.print("Please enter an amount to deposit:");
 			try{
-				value = scan.nextDouble();//Try to get input
+				value = scan.nextLine();//Try to get input
 			}
 			catch(InputMismatchException e){
 				scan.nextLine();//Goes to next line in case of an error
@@ -87,16 +89,41 @@ class Interact{
 		File input = new File(url.getPath());
 		
 		Document doc = Jsoup.parse(input, "UTF-8");
-		//System.out.println(doc.select("#transactions").select("tr").select("td").get(1));
-		Elements table = doc.select("#transactions");
-		Elements rows = table.select("tr");
+		doc.select("#transactions tbody").append("<tr><td>" + value + "</td></tr>");
 		
-		 for (int i = 0; i < rows.size(); i++) {
-		        Element row = rows.get(i);
-		        Elements cols = row.select("td");
-		        System.out.println(cols.text());
-		 }
+		FileWriter fw = new FileWriter(input, false);
+		fw.write(doc.toString());
+		fw.close();
+	}
+	
+	public void withdraw(Scanner scan) throws IOException{
 		
+		String value = "";//What the user enters
+		
+		boolean good = false;//Check whether the input is good 
+		do{
+			//Show prompt and get string input
+			System.out.print("Please enter an amount to deposit:");
+			try{
+				value = scan.nextLine();//Try to get input
+			}
+			catch(InputMismatchException e){
+				scan.nextLine();//Goes to next line in case of an error
+			}
+			good = formatCheck(value);
+		}while(!good);
+		
+		value = "-" + value;
+		
+		URL url = getClass().getResource("log.html");
+		File input = new File(url.getPath());
+		
+		Document doc = Jsoup.parse(input, "UTF-8");
+		doc.select("#transactions tbody").append("<tr><td>" + value + "</td></tr>");
+		
+		FileWriter fw = new FileWriter(input, false);
+		fw.write(doc.toString());
+		fw.close();
 	}
 	
 	public void balance() throws IOException{
@@ -106,7 +133,6 @@ class Interact{
 		double[] amounts;
 		
 		Document doc = Jsoup.parse(input, "UTF-8");
-		//System.out.println(doc.select("#transactions").select("tr").select("td").get(1));
 		Elements table = doc.select("#transactions");
 		Elements rows = table.select("tr");
 		
@@ -124,20 +150,36 @@ class Interact{
 		        total += amounts[i];
 		 }
 		 
-		 System.out.println("The current balance is: " + total);
+		 DecimalFormat df = new DecimalFormat("$0.00");
+		 String dfTotal = df.format(total);
+		 System.out.println("The current balance is: " + dfTotal);
 	}
 	
-	public boolean formatCheck(double num){
+	public boolean formatCheck(String num){
 		boolean good = false;
 		DecimalFormat df = new DecimalFormat("0.00");
-		String formatted = df.format(num);
-		String numString = Double.toString(num);
 		
-		if(formatted.equals(numString)){
-			if(num >= 0){//Make sure it is positive
+		String[] numSplit = num.split("\\.");
+		
+		double dubNum = 0.0;
+		
+		try{
+		dubNum = Double.parseDouble(num);
+		}catch(NumberFormatException e){
+			
+		}
+		String formatted = "";
+		
+		formatted = df.format(dubNum);
+		
+		 if(formatted.equals(num)){
+			if(Double.parseDouble(num) >= 0){//Make sure it is positive
 			good = true;
 			}
 		}
+		 else if(numSplit.length != 2 || !numSplit[1].equals("00")){
+			 good = false;
+		 }
 		return good;
 	}
 }
