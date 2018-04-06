@@ -15,12 +15,14 @@ public class BankSystem {
 	public static void main(String[] args) throws IOException{
 		
 		Scanner scan = new Scanner(System.in);//Instantiate Scanner class 
-		Interact inter = new Interact();
+		Interact inter = new Interact();//Instantiate the interact class, which contains the 
+										//methods that are used 
 		
-		boolean exit = false;
+		boolean exit = false;//To exit the program
 		
 		do{
-		String comm = inter.getCommand(scan);
+		String comm = inter.getCommand(scan);//Get the command, then go through if statements 
+											//to check which it was and act accordingly
 		
 		if(comm.equals("deposit")){
 			inter.deposit(scan);
@@ -42,12 +44,16 @@ public class BankSystem {
 
 class Interact{
 		
+	/**
+	   * This gets the user's input for the command, being deposit, balance, withdraw, or exit
+	   * @param scan Accepting scanner as a parameter allows scanner to be opened and closed only once
+	   * @return Returns a string value of the user's input, which is their command
+	   */
 	public String getCommand(Scanner scan){
 		
-		
 		String command;//What the user enters
-		
 		boolean good = false;//Check whether the input is good 
+		
 		do{
 			//Show prompt and get string input
 			System.out.print("Please enter in a command (Deposit, Withdraw, Balance, Exit) :");
@@ -67,11 +73,16 @@ class Interact{
 		return command;
 		}
 	
+	/**
+	   * The deposit method is what appends a positive value to the HTML file
+	   * @param scan Accepting scanner as a parameter allows scanner to be opened and closed only once
+	   * @exception IOException Exception for input error
+	   */
 	public void deposit(Scanner scan) throws IOException{
 		
 		String value = "";//What the user enters
+		boolean good = false;//Check whether the input is good
 		
-		boolean good = false;//Check whether the input is good 
 		do{
 			//Show prompt and get string input
 			System.out.print("Please enter an amount to deposit:");
@@ -85,25 +96,35 @@ class Interact{
 			good = formatCheck(value);
 		}while(!good);
 		
+		//Open the log.html file
 		URL url = getClass().getResource("log.html");
 		File input = new File(url.getPath());
 		
+		//Use Jsoup to parse the file
 		Document doc = Jsoup.parse(input, "UTF-8");
+		
+		//Append the value to the proper place
 		doc.select("#transactions tbody").append("<tr><td>" + value + "</td></tr>");
 		
+		//Re-write the document with the new value appended
 		FileWriter fw = new FileWriter(input, false);
 		fw.write(doc.toString());
 		fw.close();
 	}
 	
+	/**
+	   * The withdraw method is what appends a negative value to the HTML file
+	   * @param scan Accepting scanner as a parameter allows scanner to be opened and closed only once
+	   * @exception IOException Exception for input error
+	   */
 	public void withdraw(Scanner scan) throws IOException{
 		
 		String value = "";//What the user enters
+		boolean good = false;//Check whether the input is good
 		
-		boolean good = false;//Check whether the input is good 
 		do{
 			//Show prompt and get string input
-			System.out.print("Please enter an amount to deposit:");
+			System.out.print("Please enter an amount to withdraw:");
 			try{
 				value = scan.nextLine();//Try to get input
 			}
@@ -115,39 +136,46 @@ class Interact{
 		
 		value = "-" + value;
 		
+		//Open the log.html file
 		URL url = getClass().getResource("log.html");
 		File input = new File(url.getPath());
 		
+		//Use Jsoup to parse the file
 		Document doc = Jsoup.parse(input, "UTF-8");
+		
+		//Append the value to the proper place
 		doc.select("#transactions tbody").append("<tr><td>" + value + "</td></tr>");
 		
+		//Re-write the document with the new value appended
 		FileWriter fw = new FileWriter(input, false);
 		fw.write(doc.toString());
 		fw.close();
 	}
 	
+	/**
+	   * The balance method reads the HTML file and totals the values for the transactions table
+	   * @exception IOException Exception for input error
+	   */
 	public void balance() throws IOException{
+		
+		//Open the log.html file
 		URL url = getClass().getResource("log.html");
 		File input = new File(url.getPath());
 		
-		double[] amounts;
-		
+		//Parse and select rows from transactions table
 		Document doc = Jsoup.parse(input, "UTF-8");
 		Elements table = doc.select("#transactions");
 		Elements rows = table.select("tr");
 		
-		amounts = new double[rows.size()];
-		
 		double total = 0.0;
 		
+		//Fill out the "amounts" array and total the results
 		 for (int i = 1; i < rows.size(); i++) {
 		        Element row = rows.get(i);
 		        Elements cols = row.select("td");
-		        amounts[i] = Double.parseDouble(cols.text());
 		        
-		        //System.out.println("Amount " + (i) + ": " + amounts[i]);
-		        
-		        total += amounts[i];
+		        //Total the values found in the table
+		        total += Double.parseDouble(cols.text());
 		 }
 		 
 		 DecimalFormat df = new DecimalFormat("$0.00");
@@ -155,6 +183,11 @@ class Interact{
 		 System.out.println("The current balance is: " + dfTotal);
 	}
 	
+	/**
+	   * This is the method that checks whether the number is formatted correct
+	   * @param num The number that needs to be checked
+	   * @return Returns whether or not the number the user inputed is good
+	   */
 	public boolean formatCheck(String num){
 		boolean good = false;
 		DecimalFormat df = new DecimalFormat("0.00");
