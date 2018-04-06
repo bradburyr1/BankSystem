@@ -7,3 +7,11 @@ is used to make sure numbers are inputted correctly by the user.
 	This program makes use of the library "jsoup" (https://jsoup.org/), which offers 
 functionality for java to interact with HTML. Jsoup allowed this program to parse the HTML table 
 "transactions", as well as append information to it. 
+
+Intructions: 
+1) Download all files 
+2) Open command prompt
+3) Navigate to the project's bin folder
+4) Enter this command "java -cp jsoup-1.11.2.jar;. BankSystem" (without quotes)
+
+The project should then run. 
