@@ -14,4 +14,4 @@ Intructions:
 3) Navigate to the project's bin folder
 4) Enter this command "java -cp jsoup-1.11.2.jar;. BankSystem" (without quotes)
 
-The project should then run. 
+The project should then run. Note: The Java JDK must be installed for this to work. 
